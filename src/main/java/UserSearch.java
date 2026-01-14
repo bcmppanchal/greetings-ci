@@ -2,29 +2,28 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import javax.servlet.http.HttpServletRequest;
 
 public class UserSearch {
-
-    public void doGet(HttpServletRequest request) {
+    public static void main(String[] args) {
         try {
-            // SOURCE: User input from a URL parameter
-            String userId = request.getParameter("userId");
+            // SOURCE: Using a System Property (e.g., -Duser.id=...)
+            // CodeQL recognizes System.getProperty as a potential source.
+            String userId = System.getProperty("userId");
 
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "user", "pass");
             Statement statement = conn.createStatement();
 
-            // VULNERABILITY: Concatenating user input directly into the SQL string
+            // VULNERABILITY: String concatenation
             String query = "SELECT * FROM users WHERE id = '" + userId + "'";
 
-            // SINK: Executing the tainted string
+            // SINK: Execution
             ResultSet rs = statement.executeQuery(query);
             
             while (rs.next()) {
                 System.out.println(rs.getString("username"));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // Log error
         }
     }
 }
