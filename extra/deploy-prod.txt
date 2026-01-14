@@ -1,0 +1,33 @@
+deploy-prod:
+  
+    needs: [build, test-run]
+    if: github.ref == 'refs/heads/main' 
+    
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      url: https://github.com/${{ github.repository }}/releases/tag/v1.0.${{ github.run_number }}
+    steps:
+    
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Download candidate artifacts
+        uses: actions/download-artifact@v4       
+        with:
+          name: greetings-jar    
+
+      - name: Change to production version
+        run: >
+          mv build/libs/greetings-ci-0.0.${{ github.run_number }}.jar 
+          build/libs/greetings-ci-1.0.${{ github.run_number }}.jar
+        
+      - name: GH Release
+        uses: softprops/action-gh-release@v2
+        with: 
+          tag_name: v1.0.${{ github.run_number }}
+          generate_release_notes: true
+          name: Production
+          files: |
+            build/libs/greetings-ci-1.0.${{ github.run_number }}.jar

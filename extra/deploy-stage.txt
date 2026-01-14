@@ -1,0 +1,30 @@
+deploy-stage:
+  
+    needs: [build, test-run]
+    if: github.ref == 'refs/heads/blue' || github.ref == 'refs/heads/green' 
+      
+    runs-on: ubuntu-latest
+    environment: 
+      name: staging
+      url: https://github.com/${{ github.repository }}/releases/tag/v0.0.${{ github.run_number }}
+    steps:
+    
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Download candidate artifacts
+        uses: actions/download-artifact@v4       
+        with:
+          name: greetings-jar    
+        
+      - name: GH Release
+        uses: softprops/action-gh-release@v2
+        with: 
+          tag_name: v0.0.${{ github.run_number }}
+          generate_release_notes: true
+          name: ${{ github.ref_name }}
+          files: |
+            build/libs/greetings-ci-0.0.${{ github.run_number }}.jar
+
+            

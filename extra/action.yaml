@@ -1,0 +1,29 @@
+name: 'Test Action'
+description: 'Runs a simple execution to validate compiled built deliverable'
+author: 'attendee'
+inputs:
+  artifact-version: # semantic version of the artifact from build
+    description: 'built version of artifact'
+    required: true
+    default: '1.0.0'
+  arguments-to-print: # rest of arguments to echo out
+    description: 'arguments to print out'
+runs:
+  using: "composite"
+  steps:
+    - name: Download candidate artifacts
+      uses: actions/download-artifact@v4       
+      with:
+        name: greetings-jar
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - id: test-run
+      env:	
+        ARGS: ${{ inputs.arguments-to-print }}
+      run: |
+        chmod +x ${{ github.action_path }}/test-script.sh
+        ${{ github.action_path }}/test-script.sh ${{ inputs.artifact-version }} "$ARGS"
+      shell: bash

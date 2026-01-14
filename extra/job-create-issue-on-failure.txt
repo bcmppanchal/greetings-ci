@@ -1,0 +1,12 @@
+  create-issue-on-failure:
+
+    needs: test-run
+
+    permissions:
+      issues: write
+
+    if: always() && failure() 
+    uses: ./.github/workflows/create-failure-issue.yml 
+    with:
+      title: "Automated workflow failure issue for commit ${{ github.sha }}"
+      body: "This issue was automatically created by the workflow ${{ github.workflow }}"  
